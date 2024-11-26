@@ -38,7 +38,7 @@ export class RecordId<Tb extends string = string> extends Value {
 
 	toJSON(): { tb: string; id: RecordIdValue } {
 		return {
-			tb: escape_ident(this.tb),
+			tb: escapeIdent(this.tb),
 			id: this.id,
 		};
 	}
