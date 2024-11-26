@@ -6,7 +6,12 @@ import {
 	UnexpectedConnectionError,
 	UnexpectedServerResponse,
 } from "../errors";
-import { type RpcRequest, type RpcResponse, isLiveResult } from "../types";
+import {
+	type ExportOptions,
+	type RpcRequest,
+	type RpcResponse,
+	isLiveResult,
+} from "../types";
 import { getIncrementalID } from "../util/get-incremental-id";
 import { retrieveRemoteVersion } from "../util/version-check";
 import {
@@ -59,7 +64,11 @@ export class WebsocketEngine extends AbstractEngine {
 
 			socket.addEventListener("error", (e) => {
 				const error = new UnexpectedConnectionError(
-					"error" in e ? e.error : "An unexpected error occurred",
+					"detail" in e
+						? e.detail
+						: "error" in e
+							? e.error
+							: "An unexpected error occurred",
 				);
 				this.setStatus(ConnectionStatus.Error, error);
 				reject(error);
@@ -72,12 +81,14 @@ export class WebsocketEngine extends AbstractEngine {
 			socket.addEventListener("message", async ({ data }) => {
 				try {
 					const decoded = this.decodeCbor(
-						data instanceof Blob
-							? await data.arrayBuffer()
-							: data.buffer.slice(
-									data.byteOffset,
-									data.byteOffset + data.byteLength,
-								),
+						data instanceof ArrayBuffer
+							? data
+							: data instanceof Blob
+								? await data.arrayBuffer()
+								: data.buffer.slice(
+										data.byteOffset,
+										data.byteOffset + data.byteLength,
+									),
 					);
 
 					if (
@@ -200,6 +211,23 @@ export class WebsocketEngine extends AbstractEngine {
 
 	get connected(): boolean {
 		return !!this.socket;
+	}
+
+	async export(options?: Partial<ExportOptions>): Promise<string> {
+		if (!this.connection.url) {
+			throw new ConnectionUnavailable();
+		}
+		const url = new URL(this.connection.url);
+		const basepath = url.pathname.slice(0, -4);
+		url.protocol = url.protocol.replace("ws", "http");
+		url.pathname = `${basepath}/export`;
+
+		const buffer = await this.req_post(options ?? {}, url, {
+			Accept: "plain/text",
+		});
+
+		const dec = new TextDecoder("utf-8");
+		return dec.decode(buffer);
 	}
 }
 
