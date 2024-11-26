@@ -2,7 +2,7 @@ import path from "node:path";
 import { version } from "../package.json";
 
 const config = {
-	name: "@surrealdb/surrealdb",
+	name: "@inertia/surrealdb",
 	version,
 	exports: "./src/index.ts",
 	publish: {

@@ -7,9 +7,9 @@
 	"keywords": ["surrealdb", "surrealdb.js", "javascript", "typescript"],
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/surrealdb/surrealdb.js.git"
+		"url": "git+https://github.com/inertiasocial/surrealdb.js.git"
 	},
-	"homepage": "https://github.com/surrealdb/surrealdb.js",
+	"homepage": "https://github.com/inertiasocial/surrealdb.js",
 	"packageManager": "^bun@1.1.17",
 	"devDependencies": {
 		"@biomejs/biome": "1.8.3",
